@@ -1,0 +1,16 @@
+{
+  "name": "epic-segment-analytics",
+  "description": "polymer element to interface with Segment Analytics API",
+  "main": "epic-segment-analytics.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "epic-rx": "epic-elements/epic-rx#^1.0.2",
+    "epic-stream": "epic-elements/epic-stream"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  }
+}

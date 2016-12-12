@@ -1,0 +1,24 @@
+<script>
+EpicElements = window.EpicElements = {};
+
+/**
+ * Behavior handles configuration options for `<epic-segment-analytics>`.
+ *
+ * @polymerBehavior
+ */
+EpicElements.EpicSegmentAnalyticsConfigBehavior = {
+    properties: {
+        /**
+         * The analytics.js methods that the service creates queueing stubs for.
+         */
+        _methods: {
+            type: Array,
+            value: function() {
+                return ['trackSubmit','trackClick','trackLink','trackForm','pageview',
+                    'identify','reset','group','track','ready','alias','page','once','off','on'];
+            }
+        }
+    }
+    
+}
+</script>

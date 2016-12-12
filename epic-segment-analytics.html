@@ -1,0 +1,323 @@
+<link rel="import"
+	href="../polymer/polymer.html">
+<link rel="import"
+	href="../epic-stream/src/xstream.html">
+
+<!--
+`epic-segment-analytics`
+polymer element to interface with Segment Analytics API
+
+@demo demo/index.html
+-->
+
+<dom-module id="epic-segment-analytics">
+	<script>
+		'use strict';
+
+		Polymer({
+			is: 'epic-segment-analytics',
+			properties: {
+				/**
+				 * The https://segment.com API key to be used when loading analytics.js.
+				 * Must be set before loading the analytics.js script.
+				 */
+				key: {
+					type: String,
+					notify: true
+				},
+
+				/**
+				 * if true, the 'page' method will be called automatically
+				 */
+				trackPageviews: {
+					type: Boolean,
+					notify: true
+						// value: false
+				},
+				pageName: {
+					type: String,
+					notify: true
+						// value: ''
+				},
+				pageCategory: {
+					type: String,
+					notify: true
+						// value: ''
+				},
+				/**
+				 * Number of milliseconds to defer loading analytics.js.
+				 */
+				loadDelay: {
+					type: Number,
+					// value: 200,
+					notify: true
+				},
+				/**
+				 * Turns debug statements on/off. Useful during development.
+				 */
+				debug: {
+					type: Boolean,
+					// value: false,
+					notify: true
+				},
+				/**
+				 * if true, analytics.js will be asynchronously loaded
+				 */
+				autoload: {
+					type: Boolean,
+					// value: false,
+					notify: true
+				},
+				analytics: {
+					type: Object,
+					// value: function() {
+					// 	return window.analytics || {}
+					// },
+					notify: true
+				},
+				_state$: {
+					type: Object,
+					readOnly: true,
+					notify: true
+				}
+			},
+			observers: [
+				// '_loadAnalytics(loadTriggered, analytics, loadDelay, key, loaded)',
+				// '_enableDebugging(analytics, debug)',
+				// '_trackPageviews(loaded, analytics, trackPageviews, pageName, pageCategory)'
+			],
+			ready: function ready() {
+				var _this = this;
+
+				var analytics$ = xs.of(window.analytics = window.analytics || []);
+				var analyticsLoaded$ = xs.fromEvent(this, 'analytics-loaded').mapTo(true);
+
+				var analyticsReady$ = xs.combine(analytics$, analyticsLoaded$).map(function(v) {
+					return xs.create({
+						start: function start(listener) {
+							v[0].ready(function() {
+								return listener.next(true);
+							});
+						},
+						stop: function stop() {}
+					});
+				}).flatten();
+
+				// Property Streams
+				var key$ = this.propStream(this, 'key');
+				var trackPageviews$ = this.propStream(this, 'trackPageviews');
+				var pageName$ = this.propStream(this, 'pageName');
+				var pageCategory$ = this.propStream(this, 'pageCategory');
+				var loadDelay$ = this.propStream(this, 'loadDelay').startWith(200);
+				var debug$ = this.propStream(this, 'debug');
+				var autoload$ = this.propStream(this, 'autoload');
+
+				// Events
+				var lifecycle$ = xs.fromEvent(this, 'lifecycle').map(function(e) {
+					return e.detail.value;
+				}).startWith('ready').remember();
+
+				var loadTrigger$ = xs.fromEvent(this, 'loadtriggered').map(function(e) {
+					return e.detail.value;
+				});
+
+				var load$ = xs.merge(autoload$, loadTrigger$).startWith(false);
+
+				// State management
+				var state$ = xs.merge(analyticsLoaded$.map(function(analyticsLoaded) {
+					return {
+						analyticsLoaded: analyticsLoaded
+					};
+				}), analyticsReady$.map(function(analyticsReady) {
+					return {
+						analyticsReady: analyticsReady
+					};
+				}), analytics$.map(function(analytics) {
+					return {
+						analytics: analytics
+					};
+				}), lifecycle$.map(function(lifecycle) {
+					return {
+						lifecycle: lifecycle
+					};
+				}), key$.map(function(key) {
+					return {
+						key: key
+					};
+				}), trackPageviews$.map(function(trackPageviews) {
+					return {
+						trackPageviews: trackPageviews
+					};
+				}), pageName$.map(function(pageName) {
+					return {
+						pageName: pageName
+					};
+				}), pageCategory$.map(function(pageCategory) {
+					return {
+						pageCategory: pageCategory
+					};
+				}), loadDelay$.map(function(loadDelay) {
+					return {
+						loadDelay: loadDelay
+					};
+				}), debug$.map(function(debug) {
+					return {
+						debug: debug
+					};
+				}), autoload$.map(function(autoload) {
+					return {
+						autoload: autoload
+					};
+				}), load$.map(function(load) {
+					return {
+						load: load
+					};
+				})).fold(function(x, y) {
+					return Object.assign({}, x, y);
+				}, {}).compose(xs.debounce(60)).remember();
+
+				this._set_state$(state$);
+
+				// 				const attached$ = ;
+				var detatched$ = state$.filter(function(v) {
+					return v.lifecycle === 'detached';
+				});
+
+				var loadAnalytics$ = state$.filter(function(state) {
+					return state.lifecycle === 'attached';
+				}).filter(function(state) {
+					return state.load;
+				}).filter(function(state) {
+					return state.key;
+				}).filter(function(state) {
+					return state.analytics;
+				}).filter(function(state) {
+					return !state.analytics.initialize;
+				}).filter(function(state) {
+					return !state.analytics.invoked;
+				}).map(function(state) {
+					return xs.of(state).compose(xs.delay(state.loadDelay));
+				}).flatten().remember();
+
+				var debugAnalytics$ = state$.filter(function(state) {
+					return state.lifecycle === 'attached';
+				}).filter(function(state) {
+					return state.analytics;
+				}).map(function(state) {
+					return xs.of(state).delay(state.loadDelay);
+				}).remember();
+
+				var listener = {
+					next: function next(state) {
+						console.log(state);
+						var analytics = state.analytics;
+						var key = state.key;
+						var debug = state.debug;
+						_this._loadAnalytics(analytics, key);
+
+						if (!state.trackPageviews) {
+							return;
+						}
+						if (pageCategory && pageName) {
+							analytics.page(pageCategory, pageName);
+						} else if (pageName) {
+							analytics.page(pageName);
+						} else {
+							analytics.page();
+						}
+					}
+				};
+
+				loadAnalytics$.addListener(listener);
+
+				var debugListener = {
+					next: function next(state) {
+						var analytics = state.analytics;
+						var debug = state.debug;
+						if (debug) {
+							analytics.debug();
+						} else {
+							analytics.debug(false);
+						}
+					}
+				};
+
+				debugAnalytics$.addListener(debugListener);
+			},
+			attached: function attached() {
+				this.dispatchEvent(new CustomEvent("lifecycle", {
+					detail: {
+						value: 'attached'
+					},
+					bubbles: false
+				}));
+			},
+			detached: function detached() {
+				this.dispatchEvent(new CustomEvent("lifecycle", {
+					detail: {
+						value: 'detached'
+					},
+					bubbles: false
+				}));
+			},
+			propStream: function propStream(el, propName) {
+				var attribute = propName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+				var propChanged$ = xs.fromEvent(el, attribute + '-changed').map(function(event) {
+					return event.detail.value;
+				}).startWith(el[propName]).compose(xs.dropRepeats()).filter(function(v) {
+					return v;
+				}).remember();
+				return propChanged$;
+			},
+			_loadAnalytics: function _loadAnalytics(analytics, token) {
+				// Invoked flag, to make sure the snippet
+				// is never invoked twice.
+				analytics.invoked = true;
+
+				// A list of the methods in Analytics.js to stub.
+				analytics.methods = ['trackSubmit', 'trackClick', 'trackLink', 'trackForm', 'pageview', 'identify', 'reset', 'group', 'track', 'ready', 'alias', 'debug', 'page', 'once', 'off', 'on'];
+
+				// Define a factory to create stubs. These are placeholders
+				// for methods in Analytics.js so that you never have to wait
+				// for it to load to actually record data. The `method` is
+				// stored as the first argument, so we can replay the data.
+				analytics.factory = function(method) {
+					return function() {
+						var args = Array.prototype.slice.call(arguments);
+						args.unshift(method);
+						analytics.push(args);
+						return analytics;
+					};
+				};
+
+				// For each of our methods, generate a queueing stub.
+				for (var i = 0; i < analytics.methods.length; i++) {
+					var key = analytics.methods[i];
+					analytics[key] = analytics.factory(key);
+				}
+
+				// Define a method to load Analytics.js from our CDN,
+				// and that will be sure to only ever load it once.
+				analytics.load = function(key) {
+					// Create an async script element based on your key.
+					var script = document.createElement('script');
+					script.type = 'text/javascript';
+					script.async = true;
+					script.src = ('https:' === document.location.protocol ? 'https://' : 'http://') + 'cdn.segment.com/analytics.js/v1/' + key + '/analytics.min.js';
+
+					// Insert our script next to the first script element.
+					var first = document.getElementsByTagName('script')[0];
+					first.parentNode.insertBefore(script, first);
+				};
+
+				// Add a version to keep track of what's in the wild.
+				analytics.SNIPPET_VERSION = '4.0.0';
+				analytics.load(token);
+
+				this.dispatchEvent(new CustomEvent("analytics-loaded", {
+					bubbles: false
+				}));
+			}
+		});
+	</script>
+</dom-module>

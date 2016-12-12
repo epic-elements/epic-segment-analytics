@@ -1,0 +1,238 @@
+<!doctype html>
+
+<html>
+
+	<head>
+		<title>epic-segment-analytics test</title>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+		<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+		<script src="../../web-component-tester/browser.js"></script>
+
+		<link rel="import"
+			href="../epic-segment-analytics.html">
+		<link rel="import"
+			href="../../epic-stream/src/xstream.html">
+	</head>
+
+	<body>
+
+		<test-fixture id="basic">
+			<template>
+				<epic-segment-analytics></epic-segment-analytics>
+			</template>
+		</test-fixture>
+
+		<script>
+			'use strict';
+
+			suite('epic-segment-analytics', function() {
+				var element;
+
+				setup(function() {
+					element = fixture('basic');
+				});
+
+				test('instantiating the element works', function() {
+					assert.equal(element.is, 'epic-segment-analytics');
+				});
+
+				test('key updates state', function(done) {
+					var expected = '1234';
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('key', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('key', expected);
+				});
+
+				test('trackPageviews updates state', function(done) {
+					var expected = true;
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('trackPageviews', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('trackPageviews', expected);
+				});
+
+				test('pageName updates state', function(done) {
+					var expected = 'Test Page Name';
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('pageName', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('pageName', expected);
+				});
+
+				test('pageCategory updates state', function(done) {
+					var expected = 'Test Page Category';
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('pageCategory', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('pageCategory', expected);
+				});
+
+				test('loadDelay updates state', function(done) {
+					var expected = '400';
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(600));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('loadDelay', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('loadDelay', expected);
+				});
+
+				test('debug updates state', function(done) {
+					var expected = true;
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('debug', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('debug', expected);
+				});
+
+				test('autoload updates state', function(done) {
+					var expected = true;
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('autoload', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('autoload', expected);
+				});
+
+				test('autoload updates state.load', function(done) {
+					var expected = true;
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(400));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).to.have.property('load', expected);
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('autoload', expected);
+				});
+
+				test('autoload updates state.load', function(done) {
+					var autoload = true;
+					var key = 'tF7mwhN2NodQEVMfZvyUu406BzHWswe5';
+					var debug = true;
+
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(900));
+
+					var listener = {
+						next: function next(state) {
+							expect(state.analyticsReady).to.be.true;
+							done();
+							state$.removeListener(listener);
+						}
+					};
+
+					state$.addListener(listener);
+
+					element.set('autoload', autoload);
+					element.set('key', key);
+					element.set('debug', debug);
+				});
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "epic-segment-analytics",
+  "version": "1.0.0",
+  "description": "polymer element to interface with Segment Analytics API",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "polymer serve & npm run watch",
+    "test": "polymer test",
+    "watch": "browser-sync start --proxy localhost:8080 --files '*.html, *.js, images/*' "
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.17.0"
+  }
+}

@@ -1,0 +1,101 @@
+<script>
+EpicElements = window.EpicElements = {};
+
+/**
+ * Behavior handles configuration options for `<epic-segment-analytics>`.
+ *
+ * @polymerBehavior
+ */
+EpicElements.EpicSegmentAnalyticsBehavior = {
+    properties: {
+        /**
+         * The https://segment.com API key to be used when loading analytics.js.
+         * Must be set before loading the analytics.js script.
+         */
+        key: {
+            type: String,
+            value: ''
+        },
+        /**
+         * if true, analytics.js will be asynchronously loaded
+         */
+        autoload: {
+            type: Boolean,
+            value: true,
+            observer: '_autoLoadChanged'
+        },
+        /**
+         * Number of milliseconds to defer loading analytics.js.
+         */
+        loadDelay: {
+            type: Number,
+            value: 0,
+        },
+        /**
+         * Turns debug statements on/off. Useful during development.
+         */
+        debug: {
+            type: Boolean,
+            value: false
+        },
+        /**
+         * Flag, to make sure the snippet is never loaded twice.
+         */
+        _hasLoaded: {
+            type: Boolean,
+            value: false
+        },
+        /**
+         * The analytics.js methods that the service creates queueing stubs for.
+         */
+        _methods: {
+            type: Array,
+            value: function() {
+                return ['trackSubmit','trackClick','trackLink','trackForm','pageview',
+                    'identify','reset','group','track','ready','alias','page','once','off','on'];
+            }
+        },
+        _triggerLoad: {
+            type: Boolean,
+            value: false
+        }
+    },
+    observers: [
+        '_handleLoad(_triggerLoad, _hasLoaded, key, loadDelay, debug, _methods)'
+    ],
+    load: function(){
+        this._triggerLoad = true;
+    }
+    /**
+     * Processes config properties and adjusts load behavior accordingly.
+     *
+     * @param {String} key The segment API key.
+     * @param {Boolean} autoload if true, analytics.js will be asynchronously loaded
+     * @param {Number} loadDelay Number of milliseconds to defer loading analytics.js.
+     * @param {Boolean} debug The Turns debug statements on/off. Useful during development.
+     * @param {Boolean} _isLoaded Flag, to make sure the snippet is never loaded twice.
+     * @param {Array} _methods The analytics.js methods that the service creates queueing stubs for.
+     */
+    _autoLoadChanged: function(autoload){
+        if(!autoLoad){
+            return;
+        }
+        this._triggerLoad = true;
+    },
+    _handleLoad: function(_triggerLoad, _hasLoaded, key, loadDelay, debug, _methods){
+        if(!key, !_triggerLoad){
+            return;
+        }
+        if(hasLoaded){
+            if (window.console && console.error) {
+                console.error('Segment snippet included twice.');
+            }
+            return;
+        }
+        this.hasLoaded = true;
+        this._triggerLoad = false;
+    },
+
+
+}
+</script>
