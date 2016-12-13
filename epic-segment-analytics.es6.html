@@ -104,8 +104,8 @@ polymer element to interface with Segment Analytics API
 				// Property Streams
 				const key$ = this.propStream(this, 'key');
 				const trackPageviews$ = this.propStream(this, 'trackPageviews');
-				const pageName$ = this.propStream(this, 'pageName').startWith('');
-				const pageCategory$ = this.propStream(this, 'pageCategory').startWith('');
+				const pageName$ = this.propStream(this, 'pageName').startWith('').filter(v => typeof v === 'string');
+				const pageCategory$ = this.propStream(this, 'pageCategory').startWith('').filter(v => typeof v === 'string');
 				const loadDelay$ = this.propStream(this, 'loadDelay').startWith(200);
 				const debug$ = this.propStream(this, 'debug');
 				const autoload$ = this.propStream(this, 'autoload');
@@ -198,7 +198,7 @@ polymer element to interface with Segment Analytics API
 						console.log(state);
 						let analytics = state.analytics;
 						let key = state.key;
-						let debug = state.debug
+						let debug = state.debug;
 						this._loadAnalytics(analytics, key);
 
 						if (!state.trackPageviews) {
