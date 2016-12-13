@@ -242,6 +242,38 @@
 					element.set('key', key);
 					element.set('debug', debug);
 				});
+
+				test('pageCategory & pageName are defined when trackPageviews is set', function(done) {
+					var autoload = true;
+					var key = '1234';
+					var trackPageviews = true;
+					var debug = true;
+
+					var state$ = xs.fromEvent(element, '_state$-changed').map(function(ev) {
+						return ev.detail.value;
+					}).startWith(element._state$).filter(function(s) {
+						return s;
+					}).flatten().compose(xs.debounce(900));
+
+					var listener = {
+						next: function next(state) {
+							expect(state).has.property('pageName');
+							expect(state).has.property('pageCategory');
+							done();
+							state$.removeListener(listener);
+						},
+						error: function error(err) {
+							console.log(err)
+							done(err);
+						}
+					};
+
+					state$.addListener(listener);
+					element.set('trackPageviews', trackPageviews);
+					element.set('autoload', autoload);
+					element.set('key', key);
+					element.set('debug', debug);
+				});
 			});
 		</script>
 	</body>

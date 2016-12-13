@@ -220,10 +220,10 @@ polymer element to interface with Segment Analytics API
 						if (!state.trackPageviews) {
 							return;
 						}
-						if (pageCategory && pageName) {
-							analytics.page(pageCategory, pageName);
+						if (state.pageCategory && state.pageName) {
+							analytics.page(state.pageCategory, state.pageName);
 						} else if (pageName) {
-							analytics.page(pageName);
+							analytics.page(state.pageName);
 						} else {
 							analytics.page();
 						}
