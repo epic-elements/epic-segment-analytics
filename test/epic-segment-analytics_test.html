@@ -201,6 +201,10 @@
 							expect(state).to.have.property('load', expected);
 							done();
 							state$.removeListener(listener);
+						},
+						error: function error(err) {
+							console.log(err)
+							done(err);
 						}
 					};
 
@@ -209,7 +213,7 @@
 					element.set('autoload', expected);
 				});
 
-				test('autoload updates state.load', function(done) {
+				test('loading analytics fires ready state', function(done) {
 					var autoload = true;
 					var key = 'tF7mwhN2NodQEVMfZvyUu406BzHWswe5';
 					var debug = true;
@@ -225,6 +229,10 @@
 							expect(state.analyticsReady).to.be.true;
 							done();
 							state$.removeListener(listener);
+						},
+						error: function error(err) {
+							console.log(err)
+							done(err);
 						}
 					};
 
