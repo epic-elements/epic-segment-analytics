@@ -108,8 +108,12 @@ polymer element to interface with Segment Analytics API
 				// Property Streams
 				var key$ = this.propStream(this, 'key');
 				var trackPageviews$ = this.propStream(this, 'trackPageviews');
-				var pageName$ = this.propStream(this, 'pageName');
-				var pageCategory$ = this.propStream(this, 'pageCategory');
+				var pageName$ = undefined.propStream(undefined, 'pageName').startWith('').filter(function(v) {
+					return typeof v === 'string';
+				});
+				var pageCategory$ = undefined.propStream(undefined, 'pageCategory').startWith('').filter(function(v) {
+					return typeof v === 'string';
+				});
 				var loadDelay$ = this.propStream(this, 'loadDelay').startWith(200);
 				var debug$ = this.propStream(this, 'debug');
 				var autoload$ = this.propStream(this, 'autoload');
